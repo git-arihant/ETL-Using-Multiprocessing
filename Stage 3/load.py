@@ -1,5 +1,36 @@
-# from sqlalchemy import create_engine
-import transform
+import os
+import pandas as pd
+
+path = 'dataframes'
+os.chdir(path)
+
+n = len(os.listdir())/2
+
+transaction_list = []
+revenue_list = []
+
+# iterate through all file
+for file in os.listdir():
+    file_path = f"{path}/{file}"
+    # print(file[0:11])
+    # print(file_path)
+    if(file[0:7]=='revenue'):
+        os.chdir('..')
+        revenue_list.append(pd.read_csv(file_path))  
+        os.chdir(path)    
+    if(file[0:11]=='transaction'):
+        os.chdir('..')
+        transaction_list.append(pd.read_csv(file_path))
+        os.chdir(path)
+
+# combining dataframes
+transaction = pd.concat(transaction_list)
+
+temp = pd.concat(revenue_list,axis=1)
+revenue = pd.DataFrame([[2017,0],[2018,0],[2019,0],[2020,0]],columns = ['year','total_sales'])
+revenue['total_sales'] = temp['total_sales'].sum(axis=1).values
+
+# Loading tables to postgresql server
 import os 
 
 sql_pass = os.getenv('sql_pass')
@@ -7,7 +38,6 @@ uid =  'postgres'
 server = "haq-PC"
 # import packages
 import psycopg2
-import pandas as pd
 from sqlalchemy import create_engine
 
 def load(df,table,sql):
@@ -53,6 +83,5 @@ sqlTransaction = '''create table transaction (
 sqlRevenue = '''CREATE TABLE revenue (
     order_year INT,
     total_sales DOUBLE);'''
-load(transform.dfTransaction,'transaction',sqlTransaction)
-load(transform.revenue,'revenue',sqlRevenue)
-
+load(transaction,'transaction',sqlTransaction)
+load(revenue,'revenue',sqlRevenue)

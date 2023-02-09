@@ -1,9 +1,10 @@
-import extract
+import extract as extract
 import pandas as pd
 import random, string, re, time
 
-sTime = time.time()
 dfTransaction = extract.transaction
+dfTransaction = dfTransaction.iloc[:50000]
+sTime = time.time()
 
 transaction_id = []     # saves unique transaction values
 sales = []
